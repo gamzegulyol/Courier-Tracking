@@ -1,6 +1,7 @@
 package com.example.Courier.Tracking.controller;
 
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import com.example.Courier.Tracking.TestUtils.TestUtils;
@@ -73,6 +74,16 @@ class CourierControllerTest {
         when(courierService.getTotalTravelDistance(courierId)).thenReturn(distance);
 
         mockMvc.perform(MockMvcRequestBuilders.get(Path.BASE_PATH_COURIER + "/{courierId}/total-distance", courierId))
+            .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @Test
+    public void should_Courier_Entry_Log() throws Exception {
+        Long courierId = 1L;
+
+        when(courierService.getCourierStoreEntryLog(courierId)).thenReturn(any());
+
+        mockMvc.perform(MockMvcRequestBuilders.get(Path.BASE_PATH_COURIER + "/{courierId}/entry-log", courierId))
             .andExpect(MockMvcResultMatchers.status().isOk());
     }
 

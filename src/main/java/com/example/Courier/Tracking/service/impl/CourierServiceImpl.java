@@ -14,12 +14,11 @@ import com.example.Courier.Tracking.model.entity.Courier;
 import com.example.Courier.Tracking.model.entity.CourierLocation;
 import com.example.Courier.Tracking.model.entity.CourierStoreEntryLog;
 import com.example.Courier.Tracking.model.entity.Store;
-import com.example.Courier.Tracking.model.enums.ErrorCode;
-import com.example.Courier.Tracking.repository.CourierLocationRepository;
-import com.example.Courier.Tracking.repository.CourierRepository;
-import com.example.Courier.Tracking.repository.CourierStoreEntryLogRepository;
-import com.example.Courier.Tracking.repository.StoreRepository;
 import com.example.Courier.Tracking.service.CourierService;
+import com.example.Courier.Tracking.service.repository.CourierLocationRepositoryService;
+import com.example.Courier.Tracking.service.repository.CourierRepositoryService;
+import com.example.Courier.Tracking.service.repository.CourierStoreEntryLogRepositoryService;
+import com.example.Courier.Tracking.service.repository.StoreRepositoryService;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -37,10 +36,10 @@ public class CourierServiceImpl implements CourierService {
     private static final double STORE_RADIUS_METERS = 100.0;
     private static final int MINUTES_BEFORE_REENTRY = 1;
 
-    private final CourierRepository courierRepository;
-    private final StoreRepository storeRepository;
-    private final CourierLocationRepository courierLocationRepository;
-    private final CourierStoreEntryLogRepository courierStoreEntryLogRepository;
+    private final CourierRepositoryService courierRepositoryService;
+    private final StoreRepositoryService storeRepositoryService;
+    private final CourierLocationRepositoryService courierLocationRepositoryService;
+    private final CourierStoreEntryLogRepositoryService courierStoreEntryLogRepositoryService;
     private final CourierStoreEntryLogMapper mapper;
 
 
@@ -52,7 +51,7 @@ public class CourierServiceImpl implements CourierService {
             .surname(createCourierRequest.getSurname())
             .build();
 
-        courierRepository.save(courier);
+        courierRepositoryService.save(courier);
 
         return CreateCourierResponse.builder()
             .code(HttpStatus.OK.name())
@@ -74,8 +73,7 @@ public class CourierServiceImpl implements CourierService {
     public UpdateCourierLocationResponse updateCourierLocation(
         UpdateCourierLocationRequest updateCourierLocationRequest) {
 
-        Courier courier = courierRepository.findById(updateCourierLocationRequest.getCourierId())
-            .orElseThrow(() -> new CourierTrackingException(ErrorCode.COURIER_NOT_FOUND));
+        Courier courier = courierRepositoryService.findById(updateCourierLocationRequest.getCourierId());
 
         CourierLocation courierLocation = CourierLocation.builder()
             .courier(courier)
@@ -83,9 +81,9 @@ public class CourierServiceImpl implements CourierService {
             .longitude(updateCourierLocationRequest.getLng())
             .build();
 
-        courierLocationRepository.save(courierLocation);
+        courierLocationRepositoryService.save(courierLocation);
 
-        List<Store> stores = storeRepository.findAll();
+        List<Store> stores = storeRepositoryService.findAll();
         stores.forEach(store -> {
             double distance = DistanceCalculator.calculateDistance(store.getLatitude(), store.getLongitude(),
                 updateCourierLocationRequest.getLat(), updateCourierLocationRequest.getLng());
@@ -101,7 +99,7 @@ public class CourierServiceImpl implements CourierService {
     }
 
     private boolean courierEnterStoreCheck(Courier courier, Store store) {
-        CourierStoreEntryLog lastEntry = courierStoreEntryLogRepository.findFirstByCourierAndStoreOrderByEntryTimeDesc(
+        CourierStoreEntryLog lastEntry = courierStoreEntryLogRepositoryService.findFirstByCourierAndStoreOrderByEntryTimeDesc(
             courier, store);
         return lastEntry == null
             || Duration.between(lastEntry.getEntryTime(), Instant.now()).toMinutes() > MINUTES_BEFORE_REENTRY;
@@ -113,7 +111,7 @@ public class CourierServiceImpl implements CourierService {
             .store(store)
             .entryTime(entryTime)
             .build();
-        courierStoreEntryLogRepository.save(entryLog);
+        courierStoreEntryLogRepositoryService.save(entryLog);
     }
 
     /**
@@ -126,7 +124,7 @@ public class CourierServiceImpl implements CourierService {
     @Override
     public double getTotalTravelDistance(Long courierId) {
 
-        List<CourierLocation> locations = courierLocationRepository.findByCourierIdOrderByCreationDatetimeAsc(
+        List<CourierLocation> locations = courierLocationRepositoryService.findByCourierIdOrderByCreationDatetimeAsc(
             courierId);
         double totalDistance = 0.0;
 
@@ -145,7 +143,8 @@ public class CourierServiceImpl implements CourierService {
     @Override
     public GetCourierStoreEntryLogResponse getCourierStoreEntryLog(Long courierId) {
 
-        List<CourierStoreEntryLog> courierStoreEntryLogs = courierStoreEntryLogRepository.findByCourierId(courierId);
+        List<CourierStoreEntryLog> courierStoreEntryLogs = courierStoreEntryLogRepositoryService.findByCourierId(
+            courierId);
 
         List<CourierStoreEntryLogDto> responseDtoList = courierStoreEntryLogs.stream()
             .map(mapper::toCourierStoreEntryLogDto)

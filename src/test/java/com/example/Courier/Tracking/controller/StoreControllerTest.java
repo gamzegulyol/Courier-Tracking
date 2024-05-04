@@ -2,11 +2,13 @@ package com.example.Courier.Tracking.controller;
 
 
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.Courier.Tracking.TestUtils.TestUtils;
 import com.example.Courier.Tracking.constant.Path;
 import com.example.Courier.Tracking.model.api.request.CreateStoreRequest;
 import com.example.Courier.Tracking.model.api.response.CreateStoreResponse;
+import com.example.Courier.Tracking.model.api.response.GetStoreResponse;
 import com.example.Courier.Tracking.service.StoreService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +18,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -44,7 +45,19 @@ class StoreControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.post(Path.BASE_PATH_STORE)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(TestUtils.convertObjectToJson(request)))
-            .andExpect(MockMvcResultMatchers.status().isOk());
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    public void should_Get_Store() throws Exception {
+
+        GetStoreResponse response = new GetStoreResponse();
+
+        when(service.getAllStores()).thenReturn(response);
+
+        mockMvc.perform(MockMvcRequestBuilders.get(Path.BASE_PATH_STORE))
+            .andExpect(status().isOk());
+
     }
 
 }

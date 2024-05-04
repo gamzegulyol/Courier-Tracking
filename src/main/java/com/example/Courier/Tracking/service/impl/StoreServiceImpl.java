@@ -7,8 +7,8 @@ import com.example.Courier.Tracking.model.api.response.CreateStoreResponse;
 import com.example.Courier.Tracking.model.api.response.GetStoreResponse;
 import com.example.Courier.Tracking.model.dto.StoreDto;
 import com.example.Courier.Tracking.model.entity.Store;
-import com.example.Courier.Tracking.repository.StoreRepository;
 import com.example.Courier.Tracking.service.StoreService;
+import com.example.Courier.Tracking.service.repository.StoreRepositoryService;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class StoreServiceImpl implements StoreService {
 
-    private final StoreRepository storeRepository;
+    private final StoreRepositoryService storeRepositoryService;
     private final StoreMapper storeMapper;
 
     @Override
@@ -30,7 +30,7 @@ public class StoreServiceImpl implements StoreService {
             .latitude(createStoreRequest.getLat())
             .build();
 
-        storeRepository.save(store);
+        storeRepositoryService.save(store);
 
         return CreateStoreResponse.builder()
             .code(HttpStatus.OK.name())
@@ -40,7 +40,7 @@ public class StoreServiceImpl implements StoreService {
 
 
     public GetStoreResponse getAllStores() {
-        List<Store> storeList = storeRepository.findAll();
+        List<Store> storeList = storeRepositoryService.findAll();
 
         List<StoreDto> responseDtoList = storeList.stream()
             .map(storeMapper::toStoreDto)
