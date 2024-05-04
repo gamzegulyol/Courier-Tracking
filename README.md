@@ -88,4 +88,4 @@ Once the application is up and running, you can interact with it using the follo
 ## Note
 
 For development and testing purposes, an H2 in-memory database is used. Data will not persist between application restarts.
-* **Below is the content of the Courier-Tracking.postman_collection.json file located under the resources directory.**
+* **Courier-Tracking.postman_collection.json file located under the resources directory.**
