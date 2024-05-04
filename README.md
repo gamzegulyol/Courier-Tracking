@@ -3,7 +3,7 @@
 Courier Tracking is a comprehensive solution for managing and tracking courier movements and store locations. It provides a robust backend system with RESTful APIs for creating couriers, updating their locations, tracking their travel distances, and logging their entries into stores.
 
 ## Tech Stack
-
+- **Java 17**
 - **Spring Boot**
 - **Spring Data JPA**
 - **Spring Web**
